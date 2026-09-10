@@ -134,7 +134,7 @@ Typical batch sizes are not yet known and depend on the owner's scanning setup. 
 
 ## 16. Export
 
-Core export formats are CSV and JSON. Export profiles may define column mappings, required fields, date formats, transformations, validation rules, and grouping (for example one file per downstream account). Ambrook is the first concrete export profile; its exact column format is confirmed against Ambrook's current bulk-import documentation during implementation.
+Core export formats are CSV and JSON. Export profiles may define column mappings, required fields, date formats, transformations, validation rules, and grouping (for example one file per downstream account). Ambrook is the first concrete export profile. Ambrook imports one CSV per account with interactive column mapping and a single signed amount column; whether category and enterprise can be imported or must be set in Ambrook afterwards is confirmed with a test import before the profile is finalized.
 
 ## 17. Privacy and Security
 

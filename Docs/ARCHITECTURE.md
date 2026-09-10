@@ -56,7 +56,7 @@ Text / OCR         Inference Provider
 
 ## 3. Frontend
 
-React / Next.js is the preferred direction. The UI is a core part of the product because review quality and source verification are as important as extraction.
+React is the preferred direction (Next.js, or a Vite single-page app if server rendering is never needed). The UI is a core part of the product because review quality and source verification are as important as extraction.
 
 Likely views include Jobs, Documents, Extraction Results, Review Queue, Source PDF Viewer, Extraction Profiles, Providers, Exports, and Processing History.
 
@@ -81,6 +81,24 @@ ingest
 ```
 
 The queue/worker technology is intentionally not prescribed yet.
+
+## 5a. Proposed Technology Stack
+
+Proposed for the first release; confirm or change during review of the discovery refinement.
+
+| concern | proposal | why |
+|---|---|---|
+| backend and workers | Python, FastAPI | the strongest PDF and OCR ecosystem (PyMuPDF, pdfplumber, OCRmyPDF/Tesseract) and the simplest path to provider SDKs |
+| job execution | in-process background worker with jobs persisted in the database | single-user, local-first; no broker to run. Swap for a queue only if a second process is ever needed |
+| database | SQLite | one file, trivially backed up alongside the documents; sufficient for one user and thousands of statements |
+| document storage | local filesystem under an application data directory, path-validated | matches local-first; NAS or object storage later through the storage abstraction |
+| native text | PyMuPDF | fast, gives per-word positions for provenance |
+| OCR | Tesseract via OCRmyPDF or pytesseract, behind the OCR provider interface | local, free, adequate for reasonably good scans; cloud OCR can be added behind the same interface |
+| semantic inference | OpenAI-compatible HTTP provider first (covers llama.cpp, Ollama, and OpenAI), Anthropic second | one implementation reaches most local and cloud endpoints |
+| frontend | React with a data-grid component for the review queue and a PDF.js viewer for source navigation | dense grid plus page-level navigation are the two UI requirements that matter |
+| tests | pytest with synthetic fixtures; golden-dataset evaluation as a separate script run against the private dataset | keeps private data out of CI |
+
+The API serves source PDFs only through authenticated, id-based routes, never by client-supplied path.
 
 ## 6. Persistence
 
@@ -170,6 +188,8 @@ Results are kept after export so the user can later search by account and period
 Export should occur from export-eligible structured records (section 14). Export adapters own downstream-specific transformations, including row filtering (for example dropping zero-value rows), grouping (for example one file per downstream account), descriptions, and column formats. Initial adapters are generic CSV, generic JSON, and an Ambrook-compatible export profile.
 
 Each exported row keeps a reference to the extraction record it came from so an exported value can be traced back to its source page.
+
+**Ambrook profile notes.** Ambrook's bulk import takes a CSV per balance-sheet account, maps columns interactively, and accepts a single signed amount column. That confirms one export file per downstream account and a plain `Date, Description, Amount` core. Whether Category and Enterprise can be set through the import, or must be assigned inside Ambrook afterwards, is not stated in Ambrook's documentation and needs a test import before the profile is finalized.
 
 ## 16. Public vs Private Boundary
 
