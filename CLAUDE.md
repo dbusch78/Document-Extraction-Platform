@@ -195,6 +195,33 @@ After the owner decides:
 
 Do not use `Needs Decision` for routine implementation choices.
 
+## GitHub Agent Identity
+
+GitHub actions performed by the AI should use the repository's GitHub App identity when the required operation is supported.
+
+The local command:
+
+`gh-bot`
+
+wraps the GitHub CLI with a fresh short-lived installation token for the `document-extraction-agent` GitHub App.
+
+Use `gh-bot` instead of the owner's normal `gh` authentication for agent-authored repository activity such as:
+
+- creating or editing issues;
+- posting issue comments;
+- creating or editing pull requests;
+- posting pull-request comments;
+- managing issue labels or milestones when supported;
+- other repository operations that should visibly originate from the agent.
+
+Do not expose, print, persist, log, or commit GitHub App tokens or the private key.
+
+Do not read the GitHub App private key directly. Authentication details are encapsulated by `github-app-token` and `gh-bot`.
+
+The owner's ordinary `gh` session remains available for operations the GitHub App cannot perform. Do not silently fall back to the owner's identity for authored comments, issue bodies, or pull-request discussion. If an operation that should carry agent attribution cannot be performed with `gh-bot`, report that limitation.
+
+Git commits retain the normal repository development identity unless a separate commit-authorship approach is explicitly established.
+
 ### GitHub CLI
 
 When authenticated and permitted, use `gh` for GitHub operations instead of asking the owner to perform repetitive manual steps.

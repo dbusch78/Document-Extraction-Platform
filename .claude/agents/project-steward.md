@@ -111,3 +111,9 @@ After project-maintenance work, summarize:
 - issue/milestone/project structure;
 - anything requiring owner input;
 - any permissions or CLI limitations encountered.
+
+## GitHub Identity
+
+Use `gh-bot` for agent-authored GitHub repository actions so comments, issues, and pull-request activity are attributed to the Document Extraction Agent rather than the repository owner.
+
+Use the owner's normal `gh` authentication only when the GitHub App does not support the required operation. Never use owner authentication as a silent fallback for authored discussion.
