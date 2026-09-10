@@ -30,11 +30,6 @@ Maintain a GitHub Project with these preferred fields:
 - Implemented
 - Delivered
 
-### Horizon
-- Now
-- Next
-- Later
-
 Do not duplicate these concepts with labels.
 
 ## Issue Hierarchy
@@ -99,7 +94,7 @@ For a new repository, inspect current GitHub state first.
 Then, when authorized:
 
 1. create or attach an appropriate GitHub Project;
-2. configure Status, Delivery, and Horizon fields;
+2. configure Status and Delivery fields;
 3. establish the small initial label set;
 4. create only clearly justified initial Milestones;
 5. translate the maintained user-story document into Epics/issues selectively;

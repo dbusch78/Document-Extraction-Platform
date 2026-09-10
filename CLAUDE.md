@@ -142,11 +142,6 @@ Preferred project fields:
 
 `Delivered` means deployed, activated, released, or otherwise actually available to the intended user.
 
-**Horizon**
-- Now
-- Next
-- Later
-
 Do not use labels to duplicate these project fields.
 
 ### Issues and Hierarchy
