@@ -10,7 +10,7 @@ Read these files before making material product or architecture changes:
 - `Docs/PRD.md`
 - `Docs/ARCHITECTURE.md`
 - `Docs/USER-STORIES.md`
-- `Docs/DISCOVERY-SESSION.md`
+- `Docs/private/DISCOVERY-HANDOFF.md` (gitignored; present only in the owner's checkout)
 
 If file paths differ, find the current equivalents rather than assuming the documentation is missing.
 

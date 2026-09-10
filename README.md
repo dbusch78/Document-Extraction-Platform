@@ -92,10 +92,10 @@ The original machine-extracted value should remain available after a correction.
 
 ## Project Documentation
 
-- [`PRD.md`](PRD.md) — product goals, requirements, scope, and first-release success criteria
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) — system boundaries, provider model, processing flow, storage, and review architecture
-- [`USER-STORIES.md`](USER-STORIES.md) — initial Epics and candidate user stories
-- [`DISCOVERY-SESSION.md`](DISCOVERY-SESSION.md) — structured Business Analyst discovery session for refining the first real-world use case
+- [`Docs/PRD.md`](Docs/PRD.md) — product goals, requirements, scope, and first-release success criteria
+- [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) — system boundaries, provider model, processing flow, storage, and review architecture
+- [`Docs/USER-STORIES.md`](Docs/USER-STORIES.md) — initial Epics and candidate user stories
+- `Docs/private/` (gitignored) — owner-specific discovery material for the first real-world use case; a private deployment supplies its own
 
 ## Project Status
 
