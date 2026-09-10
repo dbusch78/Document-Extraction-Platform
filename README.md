@@ -54,7 +54,7 @@ The platform is intended to be useful for personal, family, farm, and small-busi
 
 The first production use case is historical financial record reconstruction.
 
-The goal is to process investment statements and similar financial records, extract quarterly balances and other required values, review uncertain fields, and export approved data into a format suitable for downstream import.
+The goal is to process a multi-year backlog of investment and IRA statements, extract the statement date, account number, and a handful of summary values from each, map them to the right downstream account, review uncertain fields, and export the results into a format suitable for downstream import.
 
 Ambrook is the first concrete downstream target, but Ambrook-specific mappings should remain an adapter or export profile rather than part of the core platform.
 
@@ -95,10 +95,9 @@ The original machine-extracted value should remain available after a correction.
 - [`Docs/PRD.md`](Docs/PRD.md) — product goals, requirements, scope, and first-release success criteria
 - [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) — system boundaries, provider model, processing flow, storage, and review architecture
 - [`Docs/USER-STORIES.md`](Docs/USER-STORIES.md) — initial Epics and candidate user stories
+- [`Docs/GOLDEN-DATASET.md`](Docs/GOLDEN-DATASET.md) — format of the private golden dataset and document inventory; templates in `Docs/templates/`
 - `Docs/private/` (gitignored) — owner-specific discovery material for the first real-world use case; a private deployment supplies its own
 
 ## Project Status
 
-This project is currently in initial product-definition and discovery.
-
-The first milestone is requirements discovery and representative-document analysis before implementation architecture is finalized.
+Requirements discovery for the first use case is complete. Current work is in the GitHub Project linked from this repository.

@@ -4,7 +4,7 @@
 
 The architecture supports a local-first, provider-neutral document extraction and review platform without coupling the core product to one OCR engine, language model, downstream export target, or JARVIS.
 
-It should remain simple enough to support the first Dad/Ambrook use case while leaving clear extension points for future document types and inference providers.
+It should remain simple enough to support the first use case (historical investment statements exported to Ambrook) while leaving clear extension points for future document types and inference providers.
 
 ## 2. High-Level Architecture
 
@@ -56,7 +56,7 @@ Text / OCR         Inference Provider
 
 ## 3. Frontend
 
-React / Next.js is the preferred direction. The UI is a core part of the product because review quality and source verification are as important as extraction.
+React is the preferred direction (Next.js, or a Vite single-page app if server rendering is never needed). The UI is a core part of the product because review quality and source verification are as important as extraction.
 
 Likely views include Jobs, Documents, Extraction Results, Review Queue, Source PDF Viewer, Extraction Profiles, Providers, Exports, and Processing History.
 
@@ -82,6 +82,24 @@ ingest
 
 The queue/worker technology is intentionally not prescribed yet.
 
+## 5a. Proposed Technology Stack
+
+Proposed for the first release; confirm or change during review of the discovery refinement.
+
+| concern | proposal | why |
+|---|---|---|
+| backend and workers | Python, FastAPI | the strongest PDF and OCR ecosystem (PyMuPDF, pdfplumber, OCRmyPDF/Tesseract) and the simplest path to provider SDKs |
+| job execution | in-process background worker with jobs persisted in the database | single-user, local-first; no broker to run. Swap for a queue only if a second process is ever needed |
+| database | SQLite | one file, trivially backed up alongside the documents; sufficient for one user and thousands of statements |
+| document storage | local filesystem under an application data directory, path-validated | matches local-first; NAS or object storage later through the storage abstraction |
+| native text | PyMuPDF | fast, gives per-word positions for provenance |
+| OCR | Tesseract via OCRmyPDF or pytesseract, behind the OCR provider interface | local, free, adequate for reasonably good scans; cloud OCR can be added behind the same interface |
+| semantic inference | OpenAI-compatible HTTP provider first (covers llama.cpp, Ollama, and OpenAI), Anthropic second | one implementation reaches most local and cloud endpoints |
+| frontend | React with a data-grid component for the review queue and a PDF.js viewer for source navigation | dense grid plus page-level navigation are the two UI requirements that matter |
+| tests | pytest with synthetic fixtures; golden-dataset evaluation as a separate script run against the private dataset | keeps private data out of CI |
+
+The API serves source PDFs only through authenticated, id-based routes, never by client-supplied path.
+
 ## 6. Persistence
 
 Persistence should conceptually support document metadata, processing jobs, extraction profiles, extracted fields, provenance, review/corrections, export runs, and provider configuration. These concepts do not need to become separate services.
@@ -93,6 +111,14 @@ The system should support a document-storage abstraction, such as local filesyst
 ## 8. Extraction Profiles
 
 An extraction profile defines what structured information is wanted from a document class. Profiles may define expected fields, field types, validation, extraction hints, required versus optional values, and export mappings without coupling to one model-provider prompt format.
+
+The first profile is an investment/IRA statement summary: statement ending date, account number, and five summary amounts. Profiles should describe the fields and how to find the summary page (anchor labels), not one institution's layout, because layouts change across years.
+
+## 8a. Account Identity and Mapping
+
+Documents carry an identity key, for the first use case the account number, which the platform resolves against owner-configured mappings to downstream targets (for Ambrook: account and enterprise). The mapping table is configuration in the private deployment, not code.
+
+Identity resolution is deterministic: an unresolved or ambiguous identity blocks export regardless of how confident the amount extraction is. This is the one place the design deliberately prefers a hard stop over a warning, because a wrong-account assignment is the costliest error downstream.
 
 ## 9. OCR/Text Provider Interface
 
@@ -143,21 +169,27 @@ Every material extracted field should be traceable to source evidence, including
 
 ## 14. Review Model
 
-Machine extraction and human approval are separate states.
+Machine extraction and human approval are separate states, but review is exception handling rather than a gate on every value.
 
 ```text
-extracted → needs review → approved
-
-or
-
-extracted → needs review → corrected → approved
+extracted (high confidence)      → export-eligible
+extracted (needs review)         → approved            → export-eligible
+extracted (needs review)         → corrected → approved → export-eligible
 ```
 
-The original machine-extracted value remains available after correction.
+Each value records whether it was machine-extracted, approved as-is, or corrected. The original machine-extracted value remains available after correction.
+
+Export eligibility for a statement additionally requires resolved account identity (section 8a) and no probable-duplicate flag left unresolved.
+
+Results are kept after export so the user can later search by account and period, reopen a statement, compare original and corrected values, and open the source page when downstream reconciliation reveals a discrepancy.
 
 ## 15. Export Layer
 
-Export should occur from approved structured records. Export adapters own downstream-specific transformations. Initial adapters are generic CSV, generic JSON, and an Ambrook-compatible export profile.
+Export should occur from export-eligible structured records (section 14). Export adapters own downstream-specific transformations, including row filtering (for example dropping zero-value rows), grouping (for example one file per downstream account), descriptions, and column formats. Initial adapters are generic CSV, generic JSON, and an Ambrook-compatible export profile.
+
+Each exported row keeps a reference to the extraction record it came from so an exported value can be traced back to its source page.
+
+**Ambrook profile notes.** Ambrook's bulk import takes a CSV per balance-sheet account, maps columns interactively, and accepts a single signed amount column. That confirms one export file per downstream account and a plain `Date, Description, Amount` core. Whether Category and Enterprise can be set through the import, or must be assigned inside Ambrook afterwards, is not stated in Ambrook's documentation and needs a test import before the profile is finalized.
 
 ## 16. Public vs Private Boundary
 
@@ -175,6 +207,8 @@ The semantic model should not be trusted to enforce security boundaries that can
 
 Do not prematurely add microservices solely for conceptual separation, a generic workflow engine, policy engines, enterprise RBAC, generalized document-search/RAG, multiple databases without demonstrated need, speculative event buses, or provider-specific assumptions in the core domain model.
 
-## 19. First Architectural Milestone
+## 19. Golden Dataset
 
-The first architecture milestone follows requirements discovery and representative-document analysis. The architecture should then be validated against a small golden dataset containing multiple institutions, years, layouts, scan qualities, and document types.
+Extraction and confidence behavior are validated against a small golden dataset of real statements with manually verified expected values. The dataset contains private financial documents and lives outside the public repository (in the owner's gitignored `Docs/private/` folder or another private location). The public repository documents the dataset format and may carry a few synthetic or fully redacted fixtures for automated tests.
+
+Field accuracy and account-identification accuracy are measured separately; the latter is the higher-priority acceptance metric.
