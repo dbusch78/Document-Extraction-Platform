@@ -54,7 +54,7 @@ The platform is intended to be useful for personal, family, farm, and small-busi
 
 The first production use case is historical financial record reconstruction.
 
-The goal is to process investment statements and similar financial records, extract quarterly balances and other required values, review uncertain fields, and export approved data into a format suitable for downstream import.
+The goal is to process a multi-year backlog of investment and IRA statements, extract the statement date, account number, and a handful of summary values from each, map them to the right downstream account, review uncertain fields, and export the results into a format suitable for downstream import.
 
 Ambrook is the first concrete downstream target, but Ambrook-specific mappings should remain an adapter or export profile rather than part of the core platform.
 
@@ -99,6 +99,4 @@ The original machine-extracted value should remain available after a correction.
 
 ## Project Status
 
-This project is currently in initial product-definition and discovery.
-
-The first milestone is requirements discovery and representative-document analysis before implementation architecture is finalized.
+Requirements discovery for the first use case is complete. Current work is in the GitHub Project linked from this repository.
